@@ -8,49 +8,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  run_tests:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Get latest Stable ChromeDriver URL (linux64)
-        id: get_chromedriver_url
-        run: |
-          url=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | \
-          jq -r '.channels.Stable.downloads.chromedriver[] | select(.platform=="linux64") | .url')
-          echo "url=$url" >> $GITHUB_OUTPUT
-
-      - name: Download ChromeDriver
-        run: |
-          wget ${{ steps.get_chromedriver_url.outputs.url }} -O chromedriver-linux64.zip
-
-      - name: Unzip ChromeDriver
-        run: |
-          unzip chromedriver-linux64.zip -d chromedriver
-          chmod +x chromedriver/chromedriver
-          sudo mv chromedriver/chromedriver /usr/local/bin/
-
-      - name: List ChromeDriver location
-        run: which chromedriver && chromedriver --version
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          node-version: 18
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Set up Chrome
+        uses: browser-actions/setup-chrome@v1
 
-      - name: Run tests
-        run: npm test
+      - name: Run Maven tests
+        run: mvn clean test
 
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: test-results.json
+          path: target/surefire-reports
+
 
 
