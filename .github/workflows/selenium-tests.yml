@@ -1,13 +1,10 @@
-name: Selenium Tests
+name: Java Selenium Tests
 
 on:
   push:
-    branches:
-      - main
-      - with-junit
+    branches: [ main, with-junit ]
   pull_request:
-    branches:
-      - main
+    branches: [ main, with-junit ]
 
 jobs:
   test:
@@ -20,28 +17,26 @@ jobs:
       - name: Set up JDK 18
         uses: actions/setup-java@v3
         with:
-          distribution: temurin
+          distribution: 'temurin'
           java-version: 18
 
-      - name: Install dependencies for Chrome
+      - name: Install dependencies (jq, unzip, wget)
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip libnss3 libxss1 libatk-bridge2.0-0 libgtk-3-0 libgbm-dev
+          sudo apt-get install -y jq unzip wget
 
-      - name: Download Chrome for Testing
+      - name: Get latest ChromeDriver version
+        id: chromedriver-version
         run: |
-          wget https://storage.googleapis.com/chrome-for-testing/$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.stable.chromedriver.version')/linux64/chromedriver-linux64.zip
-          unzip chromedriver-linux64.zip -d /home/runner/chromedriver/
-          mv /home/runner/chromedriver/chromedriver-linux64/chromedriver /home/runner/chromedriver/chromedriver
-          chmod +x /home/runner/chromedriver/chromedriver
-          sudo mv /home/runner/chromedriver/chromedriver /usr/local/bin/chromedriver
+          version=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.stable.chromedriver.version')
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Download and install ChromeDriver
+        run: |
+          wget https://storage.googleapis.com/chrome-for-testing/${{ steps.chromedriver-version.outputs.version }}/linux64/chromedriver-linux64.zip
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          sudo chmod +x /usr/local/bin/chromedriver
 
       - name: Run Maven tests
         run: mvn test
-
-      - name: Upload Surefire test reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: surefire-reports
-          path: target/surefire-reports/
-
