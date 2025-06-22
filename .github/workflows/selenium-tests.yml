@@ -28,17 +28,18 @@ jobs:
       - name: Get latest ChromeDriver version
         id: chromedriver-version
         run: |
-          version=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.stable.chromedriver.version')
+          curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json > chrome-testing.json
+          version=$(jq -r '.channels.stable.downloads.chromedriver.version' chrome-testing.json)
+          echo "ChromeDriver version from JSON: $version"
           echo "version=$version" >> $GITHUB_OUTPUT
-          echo "Got ChromeDriver version: $version"
 
       - name: Download and install ChromeDriver
         run: |
-          echo "Using ChromeDriver version: ${{ steps.chromedriver-version.outputs.version }}"
           wget https://storage.googleapis.com/chrome-for-testing/${{ steps.chromedriver-version.outputs.version }}/linux64/chromedriver-linux64.zip
           unzip chromedriver-linux64.zip
-          chmod +x chromedriver
-          sudo mv chromedriver /usr/local/bin/chromedriver
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          sudo chmod +x /usr/local/bin/chromedriver
 
       - name: Run Maven tests
         run: mvn test
+
