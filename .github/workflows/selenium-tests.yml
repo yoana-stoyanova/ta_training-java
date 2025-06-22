@@ -30,10 +30,11 @@ jobs:
 
       - name: Download Chrome for Testing
         run: |
-          wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/137.0.7151.120/linux64/chromedriver-linux64.zip
-          unzip chromedriver-linux64.zip -d $HOME/chromedriver
-          sudo mv $HOME/chromedriver/chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/chromedriver
+          wget https://storage.googleapis.com/chrome-for-testing/$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.stable.chromedriver.version')/linux64/chromedriver-linux64.zip
+          unzip chromedriver-linux64.zip -d /home/runner/chromedriver/
+          mv /home/runner/chromedriver/chromedriver-linux64/chromedriver /home/runner/chromedriver/chromedriver
+          chmod +x /home/runner/chromedriver/chromedriver
+          sudo mv /home/runner/chromedriver/chromedriver /usr/local/bin/chromedriver
 
       - name: Run Maven tests
         run: mvn test
