@@ -30,12 +30,13 @@ jobs:
         run: |
           version=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.stable.chromedriver.version')
           echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Got ChromeDriver version: $version"
 
       - name: Download and install ChromeDriver
         run: |
+          echo "Using ChromeDriver version: ${{ steps.chromedriver-version.outputs.version }}"
           wget https://storage.googleapis.com/chrome-for-testing/${{ steps.chromedriver-version.outputs.version }}/linux64/chromedriver-linux64.zip
           unzip chromedriver-linux64.zip
-          ls -la  # List files after unzip for debugging
           chmod +x chromedriver
           sudo mv chromedriver /usr/local/bin/chromedriver
 
