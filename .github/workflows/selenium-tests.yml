@@ -8,26 +8,23 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up JDK 18
-        uses: actions/setup-java@v3
-        with:
-          java-version: '18'
-          distribution: 'temurin'
-
-      - name: Install dependencies and Chrome
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y gconf-service libgtk2.0-0 libnotify4 libnss3 libxss1 libasound2 libxtst6 xdg-utils
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+          sudo apt-get install -y libgtk2.0-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 18
+
+      - uses: actions/setup-chrome@v1
+      - uses: actions/setup-chromedriver@v1
 
       - name: Run tests
         run: mvn test
-        env:
-          DISPLAY: ':99'
