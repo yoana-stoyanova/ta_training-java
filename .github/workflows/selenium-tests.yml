@@ -2,9 +2,9 @@ name: Selenium Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [ with-junit ]
   pull_request:
-    branches: [ main ]
+    branches: [ with-junit ]
 
 jobs:
   test:
