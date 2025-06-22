@@ -8,23 +8,33 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk2.0-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils
-
-      - uses: actions/setup-java@v3
+      - name: Set up Java
+        uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: 18
+          java-version: '18'
 
-      - uses: actions/setup-chrome@v1
-      - uses: actions/setup-chromedriver@v1
+      - name: Install Chrome and Chromedriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install -y ./google-chrome-stable_current_amd64.deb
+
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+          DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json" \
+            | grep -B 1 $CHROME_VERSION | grep "version" | head -n 1 | cut -d '"' -f4)
+
+          wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+          chmod +x /usr/local/bin/chromedriver
 
       - name: Run tests
         run: mvn test
