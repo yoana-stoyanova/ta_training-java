@@ -30,4 +30,10 @@ jobs:
           sudo apt-get install -y google-chrome-stable
 
       - name: Run Tests
-        run: mvn test
+        run: mvn test -e -X
+
+      - name: Upload Surefire test reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
