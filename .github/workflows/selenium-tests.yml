@@ -1,4 +1,4 @@
-name: Download ChromeDriver
+name: Run Selenium Tests
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  download_chromedriver:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,9 +27,30 @@ jobs:
           wget ${{ steps.get_chromedriver_url.outputs.url }} -O chromedriver-linux64.zip
 
       - name: Unzip ChromeDriver
-        run: unzip chromedriver-linux64.zip -d chromedriver
+        run: |
+          unzip chromedriver-linux64.zip -d chromedriver
+          chmod +x chromedriver/chromedriver
+          sudo mv chromedriver/chromedriver /usr/local/bin/
 
-      - name: List ChromeDriver folder contents
-        run: ls -l chromedriver
+      - name: List ChromeDriver location
+        run: which chromedriver && chromedriver --version
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results.json
 
 
