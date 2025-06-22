@@ -16,7 +16,7 @@ public class PastebinHomePageTest {
 
     @Before
     public void setUp() {
-        WebDriverManager.chromedriver().clearResolutionCache().driverVersion("137.0.7151.120").setup();
+        WebDriverManager.chromedriver().clearResolutionCache().setup();
         driver = new ChromeDriver();
     }
 
