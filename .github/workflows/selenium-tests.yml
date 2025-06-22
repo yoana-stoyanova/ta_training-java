@@ -33,7 +33,7 @@ jobs:
         run: mvn test -e -X
 
       - name: Upload Surefire test reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@4
         with:
           name: surefire-reports
           path: target/surefire-reports/
